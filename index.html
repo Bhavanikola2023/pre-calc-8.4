@@ -1,421 +1,467 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mathematics Interactive Flashcards</title>
-  <style>
-    :root {
-      --primary: #4285F4;
-      --secondary: #FF3E96;
-      --accent: #e74c3c;
-      --dark: #34495e;
-      --light: #f0f3f8;
-      --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      --button-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      --heading-color: #5E72E4;
-    }
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    body {
-      background: #f0f3f8;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-    }
-    header {
-      text-align: center;
-      margin-bottom: 30px;
-      color: var(--dark);
-      width: 100%;
-      max-width: 800px;
-    }
-    h1 {
-      margin-bottom: 10px;
-      font-size: 2.2rem;
-      color: var(--heading-color);
-      text-align: center;
-    }
-    .subheading {
-      font-size: 1.1rem;
-      color: var(--dark);
-      opacity: 0.8;
-    }
-    
-    .container {
-      width: 100%;
-      max-width: 800px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .modes {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-    }
-    .mode-btn {
-      padding: 10px 30px;
-      border: none;
-      border-radius: 50px;
-      background: white;
-      color: var(--dark);
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      box-shadow: var(--button-shadow);
-    }
-    
-    .mode-btn.active {
-      background: var(--secondary);
-      color: white;
-    }
-    .mode-btn:nth-child(2).active {
-      background: var(--primary);
-      color: white;
-    }
-    .mode-btn:nth-child(3).active {
-      background: var(--accent);
-      color: white;
-    }
-    .card-container {
-      position: relative;
-      perspective: 1500px;
-      height: 350px;
-      margin-bottom: 20px;
-    }
-    .card {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      transform-style: preserve-3d;
-      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-      border-radius: 15px;
-      box-shadow: var(--card-shadow);
-      cursor: pointer;
-    }
-    .card.flipped {
-      transform: rotateY(180deg);
-    }
-    .card-face {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 30px;
-      border-radius: 15px;
-      overflow: hidden;
-    }
-    .card-front {
-      background: white;
-      color: var(--dark);
-    }
-    .card-back {
-      background: var(--dark);
-      color: white;
-      transform: rotateY(180deg);
-      text-align: center;
-    }
-    .formula {
-      font-size: 1.8rem;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    .explanation {
-      font-size: 1rem;
-      margin-top: 15px;
-      text-align: center;
-    }
-    .card-note {
-      position: absolute;
-      top: 15px;
-      left: 15px;
-      background: var(--primary);
-      color: white;
-      padding: 5px 10px;
-      border-radius: 50px;
-      font-size: 0.8rem;
-      font-weight: bold;
-    }
-    .card-hint {
-      position: absolute;
-      bottom: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: rgba(0, 0, 0, 0.5);
-      font-size: 0.9rem;
-    }
-    .controls {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      width: 100%;
-      margin-top: 10px;
-      flex-wrap: wrap;
-    }
-    .control-btn {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      background: var(--primary);
-      color: white;
-      box-shadow: var(--button-shadow);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .control-btn:hover {
-      opacity: 0.9;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-    .progress-container {
-      width: 100%;
-      background-color: rgba(255, 255, 255, 0.5);
-      border-radius: 10px;
-      height: 8px;
-      margin-top: 20px;
-      overflow: hidden;
-    }
-    .progress-bar {
-      height: 100%;
-      background: var(--primary);
-      border-radius: 10px;
-      transition: width 0.4s ease;
-    }
-    .card-counter {
-      font-size: 0.9rem;
-      color: var(--dark);
-      margin-top: 10px;
-      text-align: center;
-    }
-    
-    .study-guide-container {
-      display: none;
-      width: 100%;
-      background: white;
-      border-radius: 15px;
-      padding: 30px;
-      box-shadow: var(--card-shadow);
-    }
-    
-    .study-section {
-      margin-bottom: 30px;
-    }
-    
-    .study-section h2 {
-      color: var(--heading-color);
-      margin-bottom: 15px;
-      border-bottom: 2px solid var(--light);
-      padding-bottom: 8px;
-    }
-    
-    .formula-list {
-      list-style-type: none;
-    }
-    
-    .formula-list li {
-      margin-bottom: 15px;
-      padding-left: 20px;
-      position: relative;
-    }
-    
-    .formula-list li:before {
-      content: "📌";
-      position: absolute;
-      left: 0;
-      color: var(--primary);
-    }
-    
-    .tip-list {
-      list-style-type: none;
-    }
-    
-    .tip-list li {
-      margin-bottom: 15px;
-      padding-left: 20px;
-      position: relative;
-    }
-    
-    .tip-list li:before {
-      content: "✅";
-      position: absolute;
-      left: 0;
-      color: var(--secondary);
-    }
-    
-    .formula-block {
-      background-color: var(--light);
-      padding: 10px;
-      border-radius: 8px;
-      margin: 10px 0;
-      font-family: 'Courier New', monospace;
-    }
-    
-    @media (max-width: 768px) {
-      .container {
-        padding: 10px;
-      }
-      .card-container {
-        height: 400px;
-      }
-      .formula {
-        font-size: 1.5rem;
-      }
-      .modes {
-        flex-wrap: wrap;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vector and Dot Product Flashcards - Section 8.3</title>
+<style>
+:root {
+  --primary: #4285F4;
+  --secondary: #FF3E96;
+  --accent: #e74c3c;
+  --dark: #34495e;
+  --light: #f0f3f8;
+  --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  --button-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --heading-color: #5E72E4;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+body {
+  background: #f0f3f8;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+header {
+  text-align: center;
+  margin-bottom: 30px;
+  color: var(--dark);
+  width: 100%;
+  max-width: 800px;
+}
+h1 {
+  margin-bottom: 10px;
+  font-size: 2.2rem;
+  color: var(--heading-color);
+  text-align: center;
+}
+.subheading {
+  font-size: 1.1rem;
+  color: var(--dark);
+  opacity: 0.8;
+}
+
+.container {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.card-container {
+  position: relative;
+  perspective: 1500px;
+  height: 350px;
+  margin-bottom: 20px;
+}
+.card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 15px;
+  box-shadow: var(--card-shadow);
+  cursor: pointer;
+}
+.card.flipped {
+  transform: rotateY(180deg);
+}
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  border-radius: 15px;
+  overflow: hidden;
+}
+.card-front {
+  background: white;
+  color: var(--dark);
+}
+.card-back {
+  background: var(--dark);
+  color: white;
+  transform: rotateY(180deg);
+  text-align: center;
+}
+.formula {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.explanation {
+  font-size: 1rem;
+  margin-top: 15px;
+  text-align: center;
+}
+.card-note {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: var(--primary);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+.card-hint {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 0.9rem;
+}
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  margin-top: 10px;
+}
+.control-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  background: var(--primary);
+  color: white;
+  box-shadow: var(--button-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.control-btn:hover {
+  opacity: 0.9;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+.progress-container {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  height: 8px;
+  margin-top: 20px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 10px;
+  transition: width 0.4s ease;
+}
+.card-counter {
+  font-size: 0.9rem;
+  color: var(--dark);
+  margin-top: 10px;
+  text-align: center;
+}
+.modes {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+.mode-btn {
+  padding: 10px 30px;
+  border: none;
+  border-radius: 50px;
+  background: white;
+  color: var(--dark);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: var(--button-shadow);
+}
+.mode-btn.active {
+  background: var(--secondary);
+  color: white;
+}
+.mode-btn:nth-child(2).active {
+  background: var(--primary);
+  color: white;
+}
+.study-guide {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: var(--card-shadow);
+  width: 100%;
+}
+.study-guide h2 {
+  color: var(--heading-color);
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+.study-guide ul {
+  padding-left: 20px;
+  margin-bottom: 15px;
+}
+.study-guide li {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+.tip {
+  background: #f8f9fa;
+  border-left: 4px solid var(--secondary);
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 0 8px 8px 0;
+}
+.tip-title {
+  font-weight: bold;
+  color: var(--secondary);
+  margin-bottom: 5px;
+}
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+  .card-container {
+    height: 400px;
+  }
+  .formula {
+    font-size: 1.5rem;
+  }
+  .controls {
+    flex-wrap: wrap;
+  }
+}
+</style>
 </head>
 <body>
-  <header>
-    <h1>Mathematics Interactive Learning</h1>
-    <p class="subheading">Trigonometry & Vector Flashcards and Study Guide</p>
-  </header>
+<header>
+  <h1>Algebraically Defined Vectors and the Dot Product</h1>
+  <p class="subheading">Section 8.3 Interactive Study Tools</p>
+</header>
+<div class="container">
+  <div class="modes">
+    <button class="mode-btn active" id="flashcard-btn">Flashcards</button>
+    <button class="mode-btn" id="guide-btn">Study Guide</button>
+  </div>
 
-  <div class="container">
-    <div class="modes">
-      <button class="mode-btn active" id="trig-btn">Trig Identities</button>
-      <button class="mode-btn" id="vector-btn">Vector Operations</button>
-      <button class="mode-btn" id="study-guide-btn">Study Guide</button>
+  <!-- Flashcards Section -->
+  <div class="flashcards-container">
+    <div class="card-container">
+      <div class="card">
+        <div class="card-face card-front">
+          <div class="card-note">Vector Representation</div>
+          <div class="formula">Vector in Component Form</div>
+          <div class="card-hint">(Click to reveal the formula)</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="formula">v = ⟨x₂ - x₁, y₂ - y₁⟩</div>
+          <div class="explanation">
+            This represents a vector from point (x₁, y₁) to point (x₂, y₂) in component form.
+          </div>
+        </div>
+      </div>
     </div>
-
-    <!-- Trig Flashcards Section -->
-    <div class="flashcards-container" id="trig-container">
-      <div class="card-container">
-        <div class="card">
-          <div class="card-face card-front">
-            <div class="card-note">Sum and Difference Identity</div>
-            <div class="formula">cos(α + β) = ?</div>
-            <div class="card-hint">(Click to reveal the formula)</div>
-          </div>
-          <div class="card-face card-back">
-            <div class="formula">cos(α + β) = cosα·cosβ - sinα·sinβ</div>
-            <div class="explanation">
-              This formula expresses the cosine of a sum in terms of the sines and cosines
-              of the individual angles.
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="controls">
-        <button class="control-btn" id="prev-btn">Previous</button>
-        <button class="control-btn" id="flip-btn">Flip Card</button>
-        <button class="control-btn" id="next-btn">Next</button>
-        <button class="control-btn" id="random-btn">Random</button>
-      </div>
-      <div class="progress-container">
-        <div class="progress-bar" style="width: 10%;"></div>
-      </div>
-      <div class="card-counter">Card 1 of 10</div>
+    <div class="controls">
+      <button class="control-btn" id="prev-btn">Previous</button>
+      <button class="control-btn" id="flip-btn">Flip Card</button>
+      <button class="control-btn" id="next-btn">Next</button>
+      <button class="control-btn" id="random-btn">Random</button>
     </div>
-
-    <!-- Vector Flashcards Section -->
-    <div class="flashcards-container" id="vector-container" style="display: none;">
-      <div class="card-container">
-        <div class="card">
-          <div class="card-face card-front">
-            <div class="card-note">Vector Operations</div>
-            <div class="formula">Vector Magnitude |v| = ?</div>
-            <div class="card-hint">(Click to reveal the formula)</div>
-          </div>
-          <div class="card-face card-back">
-            <div class="formula">|v| = √(x² + y²)</div>
-            <div class="explanation">
-              The magnitude or length of a vector is calculated using the Pythagorean theorem with its components.
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="controls">
-        <button class="control-btn" id="prev-vector-btn">Previous</button>
-        <button class="control-btn" id="flip-vector-btn">Flip Card</button>
-        <button class="control-btn" id="next-vector-btn">Next</button>
-        <button class="control-btn" id="random-vector-btn">Random</button>
-      </div>
-      <div class="progress-container">
-        <div class="progress-bar" id="vector-progress" style="width: 10%;"></div>
-      </div>
-      <div class="card-counter" id="vector-counter">Card 1 of 8</div>
+    <div class="progress-container">
+      <div class="progress-bar" style="width: 12.5%;"></div>
     </div>
-
-    <!-- Study Guide Section -->
-    <div class="study-guide-container" id="study-guide">
-      <div class="study-section">
-        <h2>Vector Operations and Dot Product</h2>
-        <div class="formula-list">
-          <p><strong>1. Vector Representation in Component Form</strong></p>
-          <div class="formula-block">v = ⟨x₂ - x₁, y₂ - y₁⟩</div>
-          <p><strong>2. Magnitude (Length) of a Vector</strong></p>
-          <div class="formula-block">|v| = √(x² + y²)</div>
-          <p><strong>3. Unit Vector in the Direction of v</strong></p>
-          <div class="formula-block">u = v / |v|</div>
-          <p><strong>4. Vector Addition and Subtraction</strong></p>
-          <div class="formula-block">u + v = ⟨x₁ + x₂, y₁ + y₂⟩<br>u - v = ⟨x₁ - x₂, y₁ - y₂⟩</div>
-          <p><strong>5. Scalar Multiplication</strong></p>
-          <div class="formula-block">k · v = ⟨k · x, k · y⟩</div>
-          <p><strong>6. Dot Product</strong></p>
-          <div class="formula-block">u · v = x₁x₂ + y₁y₂</div>
-          <p><strong>7. Angle Between Vectors</strong></p>
-          <div class="formula-block">cos(θ) = (u · v) / (|u| · |v|)</div>
-          <p><strong>8. Vector Projection</strong></p>
-          <div class="formula-block">proj_v(u) = (u · v) / |v|² · v</div>
-        </div>
-      </div>
-      
-      <div class="study-section">
-        <h2>Study Tips for Vector Operations</h2>
-        <div class="tip-list">
-          <p><strong>Tip 1: Understand Vector Notation</strong></p>
-          <p>- Vectors are often written in component form ⟨x, y⟩<br>
-             - They can also be expressed as magnitude and direction</p>
-          <p><strong>Tip 2: Recognize Vector Properties</strong></p>
-          <p>- Vectors can be added or subtracted like coordinate points<br>
-             - Scalar multiplication changes length but not direction (unless negative)</p>
-          <p><strong>Tip 3: Dot Product and Perpendicularity</strong></p>
-          <p>- If u · v = 0, the vectors are perpendicular (orthogonal)</p>
-          <p><strong>Tip 4: Finding Angles Between Vectors</strong></p>
-          <p>- Always apply the cos(θ) formula when working with angles<br>
-             - Calculate the magnitude of both vectors correctly first</p>
-          <p><strong>Tip 5: Vector Projections in Applications</strong></p>
-          <p>- Use projection formulas to find the component of one vector along another<br>
-             - This is particularly useful in physics and engineering problems</p>
-          <p><strong>Tip 6: Using Calculators</strong></p>
-          <p>- For complex calculations, use a calculator with vector operations<br>
-             - Be consistent with degrees or radians as required</p>
-        </div>
-      </div>
-      
-      <div class="study-section">
-        <h2>Trigonometric Sum and Difference Identities</h2>
-        <div class="formula-list">
-          <p><strong>1. Cosine Sum Identity</strong></p>
-          <div class="formula-block">cos(α + β) = cosα cosβ - sinα sinβ</div>
-          <p><strong>2. Cosine Difference Identity</strong></p>
-          <div class="formula-block">cos(α - β) = cosα cosβ + sinα sinβ</div>
-          <p><strong>3. Sine Sum Identity</strong></p>
-          <div class="formula-block">sin(α + β) = sinα cosβ + cosα sinβ</div>
-          <p><strong>4. Sine Difference Identity</strong></p>
-          <div class="formula-block">sin(α - β) = sinα cosβ - cosα sinβ</div>
-        </div>
-      </div>
+    <div class="card-counter">Card 1 of 8</div>
+  </div>
+  
+  <!-- Study Guide Section -->
+  <div class="study-guide" style="display: none;">
+    <h2>Vector and Dot Product Study Guide</h2>
+    
+    <div class="tip">
+      <div class="tip-title">Key Formulas: Vectors and the Dot Product</div>
+      <ul>
+        <li><strong>Vector Representation:</strong> v = ⟨x₂ - x₁, y₂ - y₁⟩</li>
+        <li><strong>Magnitude:</strong> |v| = sqrt(x² + y²)</li>
+        <li><strong>Unit Vector:</strong> u = v / |v|</li>
+        <li><strong>Vector Addition:</strong> u + v = ⟨x₁ + x₂, y₁ + y₂⟩</li>
+        <li><strong>Vector Subtraction:</strong> u - v = ⟨x₁ - x₂, y₁ - y₂⟩</li>
+        <li><strong>Scalar Multiplication:</strong> k * v = ⟨k * x, k * y⟩</li>
+        <li><strong>Dot Product:</strong> u · v = x₁x₂ + y₁y₂</li>
+        <li><strong>Angle Between Vectors:</strong> cos(θ) = (u · v) / (|u| |v|)</li>
+        <li><strong>Projection:</strong> proj_v (u) = (u · v) / |v|² * v</li>
+      </ul>
+    </div>
+    
+    <div class="tip">
+      <div class="tip-title">Study Tips</div>
+      <ul>
+        <li><strong>Understand Vector Notation:</strong> Vectors are often written in component form ⟨x, y⟩ or as magnitude and direction.</li>
+        <li><strong>Vector Properties:</strong> Vectors can be added or subtracted like coordinate points.</li>
+        <li><strong>Dot Product and Perpendicularity:</strong> If u · v = 0, the vectors are perpendicular (orthogonal).</li>
+        <li><strong>Angle Calculations:</strong> Always apply the cos(θ) formula when working with angles between vectors.</li>
+        <li><strong>Vector Projections:</strong> Use projection formula when finding the component of one vector along another.</li>
+      </ul>
     </div>
   </div>
+</div>
+
+<script>
+// Card data
+const cardData = [
+  {
+    type: 'Vector Representation',
+    front: 'Vector in Component Form',
+    back: 'v = ⟨x₂ - x₁, y₂ - y₁⟩',
+    explanation: 'This represents a vector from point (x₁, y₁) to point (x₂, y₂) in component form.'
+  },
+  {
+    type: 'Vector Magnitude',
+    front: 'Magnitude (Length) of a Vector',
+    back: '|v| = sqrt(x² + y²)',
+    explanation: 'The length of a vector is calculated using the Pythagorean theorem, where x and y are the vector components.'
+  },
+  {
+    type: 'Unit Vector',
+    front: 'Unit Vector in Direction of v',
+    back: 'u = v / |v|',
+    explanation: 'A unit vector has magnitude 1 and points in the same direction as the original vector.'
+  },
+  {
+    type: 'Vector Operations',
+    front: 'Vector Addition',
+    back: 'u + v = ⟨x₁ + x₂, y₁ + y₂⟩',
+    explanation: 'To add vectors, sum their corresponding components.'
+  },
+  {
+    type: 'Vector Operations',
+    front: 'Scalar Multiplication',
+    back: 'k * v = ⟨k * x, k * y⟩',
+    explanation: 'Multiplying a vector by a scalar changes its length (and direction if k is negative).'
+  },
+  {
+    type: 'Dot Product',
+    front: 'Dot Product Formula',
+    back: 'u · v = x₁x₂ + y₁y₂',
+    explanation: 'The dot product is a scalar value that can be used to find angles between vectors.'
+  },
+  {
+    type: 'Dot Product Application',
+    front: 'Angle Between Two Vectors',
+    back: 'cos(θ) = (u · v) / (|u| |v|)',
+    explanation: 'This formula determines the angle between two vectors. If the dot product equals zero, the vectors are perpendicular.'
+  },
+  {
+    type: 'Vector Projection',
+    front: 'Projection of u onto v',
+    back: 'proj_v (u) = (u · v) / |v|² * v',
+    explanation: 'This gives the component of vector u that is parallel to vector v.'
+  }
+];
+
+// Variables for tracking state
+let currentCardIndex = 0;
+let isFlipped = false;
+
+// DOM elements
+const card = document.querySelector('.card');
+const progressBar = document.querySelector('.progress-bar');
+const cardCounter = document.querySelector('.card-counter');
+
+// Buttons
+const flipBtn = document.getElementById('flip-btn');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+const randomBtn = document.getElementById('random-btn');
+
+// Mode switching
+const flashcardBtn = document.getElementById('flashcard-btn');
+const guideBtn = document.getElementById('guide-btn');
+const flashcardsContainer = document.querySelector('.flashcards-container');
+const studyGuide = document.querySelector('.study-guide');
+
+flashcardBtn.onclick = function() {
+  flashcardBtn.classList.add('active');
+  guideBtn.classList.remove('active');
+  flashcardsContainer.style.display = 'block';
+  studyGuide.style.display = 'none';
+};
+
+guideBtn.onclick = function() {
+  guideBtn.classList.add('active');
+  flashcardBtn.classList.remove('active');
+  flashcardsContainer.style.display = 'none';
+  studyGuide.style.display = 'block';
+};
+
+// Initialize
+updateCard();
+
+// Flashcard event listeners
+flipBtn.onclick = toggleFlip;
+card.onclick = toggleFlip;
+prevBtn.onclick = prevCard;
+nextBtn.onclick = nextCard;
+randomBtn.onclick = randomCard;
+
+// Flashcard functions
+function toggleFlip() {
+  isFlipped = !isFlipped;
+  card.classList.toggle('flipped');
+}
+
+function prevCard() {
+  isFlipped = false;
+  card.classList.remove('flipped');
+  currentCardIndex = (currentCardIndex - 1 + cardData.length) % cardData.length;
+  updateCard();
+}
+
+function nextCard() {
+  isFlipped = false;
+  card.classList.remove('flipped');
+  currentCardIndex = (currentCardIndex + 1) % cardData.length;
+  updateCard();
+}
+
+function randomCard() {
+  isFlipped = false;
+  card.classList.remove('flipped');
+  let newIndex;
+  do {
+    newIndex = Math.floor(Math.random() * cardData.length);
+  } while (newIndex === currentCardIndex && cardData.length > 1);
+  currentCardIndex = newIndex;
+  updateCard();
+}
+
+function updateCard() {
+  const currentCard = cardData[currentCardIndex];
+  const cardNote = document.querySelector('.card-note');
+  const frontFormula = document.querySelector('.card-front .formula');
+  const backFormula = document.querySelector('.card-back .formula');
+  const explanation = document.querySelector('.explanation');
+  
+  cardNote.textContent = currentCard.type;
+  frontFormula.textContent = currentCard.front;
+  backFormula.textContent = currentCard.back;
+  explanation.textContent = currentCard.explanation;
+  
+  // Update progress
+  progressBar.style.width = `${((currentCardIndex + 1) / cardData.length) * 100}%`;
+  cardCounter.textContent = `Card ${currentCardIndex + 1} of ${cardData.length}`;
+}
+</script>
 </body>
 </html>
